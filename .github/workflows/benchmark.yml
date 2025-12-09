@@ -1,0 +1,32 @@
+name: Run Benchmarks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore BenchmarksPi/BenchmarksPi.csproj
+      
+    - name: Build in Release mode
+      run: dotnet build BenchmarksPi/BenchmarksPi.csproj --configuration Release --no-restore
+      
+    - name: Run benchmarks
+      run: dotnet run --project BenchmarksPi/BenchmarksPi.csproj --configuration Release --no-build
